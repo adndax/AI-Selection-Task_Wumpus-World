@@ -1,0 +1,173 @@
+'use client';
+
+import { useState } from 'react';
+import Button from '@/components/button';
+import Panel from '@/components/panel';
+import Grid from '@/components/grid';
+import AlgorithmSelector from '@/components/algorithm-selector';
+import Image from 'next/image';
+import Link from 'next/link';
+
+export default function Start() {
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState<'qlearning' | 'sarsa'>('qlearning');
+  const [isTraining, setIsTraining] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+
+  const handleStartTraining = () => {
+    setIsTraining(true);
+    // Simulate training process
+    setTimeout(() => {
+      setIsTraining(false);
+      setIsComplete(true);
+    }, 3000);
+  };
+
+  const handleReset = () => {
+    setIsComplete(false);
+    setIsTraining(false);
+  };
+
+  return (
+    <div className="min-h-screen p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <Image 
+            src="/logo.png"  
+            alt="Logo"  
+            width={80}  
+            height={80}
+            className="mx-auto mb-3"
+          />
+          <h1 className="text-white text-2xl font-bold tracking-wider mb-1">
+            Wumpus World Simulation
+          </h1>
+          <p className="font-poppins text-white/70 text-sm">
+            Reinforcement Learning with Q-Learning and SARSA
+          </p>
+        </div>
+
+      <div className="grid grid-cols-1 gap-y-4 lg:grid-cols-4 lg:gap-4">
+          <div className="space-y-4">
+            {/* Reinforcement Learning */}
+            <Panel>
+              <h2 className="text-yellow-400 text-base font-bold mb-3">Reinforcement Learning</h2>
+              <div className="font-poppins text-white/90 leading-relaxed text-xs">
+                <p>
+                  Agent learns optimal policy through trial and error, receiving rewards and penalties for actions taken in the environment.
+                </p>
+              </div>
+            </Panel>
+
+            {/* Game Rules & Rewards */}
+            <Panel>
+              <h3 className="text-yellow-400 text-base font-bold mb-3">Game Rules & Rewards</h3>
+              <div className="font-poppins text-white/90 text-xs space-y-3">
+                <div>
+                  <h4 className="text-white font-semibold text-xs mb-2">Actions & Penalties:</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
+                    <li>Move/Turn: <span className="text-red-400">-1 point</span></li>
+                    <li>Enter Wumpus/Pit: <span className="text-red-400">-1000 points</span> (Game Over)</li>
+                    <li>Grab Gold: <span className="text-green-400">+1000 points</span></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-white font-semibold text-xs mb-1">Win Condition:</h4>
+                  <p className="text-xs">Get Gold → Return to [1,1] → Climb</p>
+                </div>
+                <div>
+                  <h4 className="text-white font-semibold text-xs mb-1">Available Actions:</h4>
+                  <p className="text-xs">Move Forward, Turn Left/Right, Grab, Climb</p>
+                </div>
+                <div>
+                  <h4 className="text-white font-semibold text-xs mb-1">Sensors:</h4>
+                  <p className="text-xs">Stench (near Wumpus), Breeze (near Pit), Glitter (on Gold)</p>
+                </div>
+              </div>
+            </Panel>
+          </div>
+
+          {/* Game Grid */}
+          <div className="col-span-2 space-y-4">
+            <Panel>
+              <h3 className="text-yellow-400 text-lg font-bold mb-4 text-center">Wumpus World Environment</h3>
+              <div className="flex justify-center mb-4">
+                <Grid className="scale-100" />
+              </div>
+            </Panel>
+          </div>
+
+          <div className="space-y-4">
+            {/* Algorithm Selection */}
+            <Panel>
+              <h3 className="text-yellow-400 text-base font-bold mb-3">Algorithm</h3>
+              <AlgorithmSelector 
+                selectedAlgorithm={selectedAlgorithm}
+                onSelect={setSelectedAlgorithm}
+              />
+            </Panel>
+
+            {/* Training Controls */}
+            <Panel>
+              <h3 className="text-yellow-400 text-base font-bold mb-3">Training</h3>
+              
+              <div className="space-y-3">
+                {!isComplete && !isTraining && (
+                  <div>
+                    <button
+                      onClick={handleStartTraining}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 text-sm rounded-lg transition-colors duration-200"
+                    >
+                      Start Training
+                    </button>
+                  </div>
+                )}
+
+                {isTraining && (
+                  <div className="text-center">
+                    <div className="mb-3">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-400 mx-auto"></div>
+                    </div>
+                    <p className="font-poppins text-white/90 text-xs">
+                      Training {selectedAlgorithm.toUpperCase()}...
+                    </p>
+                  </div>
+                )}
+
+                {isComplete && (
+                  <div className="space-y-3">
+                    <div className="text-green-400 font-poppins text-center">
+                      <p className="text-sm font-semibold">Complete!</p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleReset}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200"
+                      >
+                        Train Again
+                      </button>
+                      <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200">
+                        View Q-Table
+                      </button>
+                      <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200">
+                        Show Path
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Panel>
+          </div>
+        </div>
+
+        {/* Back Button */}
+        <div className="text-center mt-8">
+          <Link href="/">
+            <Button text="BACK TO HOME" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
