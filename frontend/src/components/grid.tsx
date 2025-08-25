@@ -86,8 +86,7 @@ export default function Grid({ size = 4, className = '' }: GridProps) {
     }
     
     // Breeze around Pits 
-    if ((x === 2 && y === 1) || (x === 3 && y === 2) || (x === 4 && y === 1) || 
-        (x === 2 && y === 2) || (x === 4 && y === 3) || (x === 3 && y === 4) || (x === 4 && y === 4)) {
+    if ((x === 2 && y === 1) || (x === 3 && y === 2) || (x === 4 && y === 1) || (x === 4 && y === 3) || (x === 3 && y === 4) || (x === 4 && y === 4)) {
       return { 
         content: 'Breeze', 
         bgColor: 'bg-slate-800/60', 
