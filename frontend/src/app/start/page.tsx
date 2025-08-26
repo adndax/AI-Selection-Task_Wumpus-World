@@ -20,18 +20,64 @@ export default function Start() {
     episodes: 1000
   });
 
-  const handleStartTraining = () => {
+  const [qTableData, setQTableData] = useState(null);
+  const [optimalPathData, setOptimalPathData] = useState<number[][] | null>(null);
+  const [showQTable, setShowQTable] = useState(false);
+  const [showOptimalPath, setShowOptimalPath] = useState(false);
+
+  const handleStartTraining = async () => {
     setIsTraining(true);
-    // Simulate training process
-    setTimeout(() => {
+    setIsComplete(false);
+    setShowQTable(false);
+    setShowOptimalPath(false);
+    
+    try {
+      const response = await fetch('http://localhost:5001/api/train', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          algorithm: selectedAlgorithm,
+          hyperparams: hyperparams  
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        setQTableData(result.q_table);
+        setOptimalPathData(result.optimal_path);
+        console.log('Training started:', result.message);
+        setIsTraining(false);
+        setIsComplete(true);
+      } else {
+        console.error('Training failed:', result.error);
+        setIsTraining(false);
+      }
+    } catch (error) {
+      console.error('Error starting training:', error);
       setIsTraining(false);
-      setIsComplete(true);
-    }, 3000);
+    }
   };
 
   const handleReset = () => {
     setIsComplete(false);
     setIsTraining(false);
+    setShowQTable(false);
+    setShowOptimalPath(false);
+    setQTableData(null);
+    setOptimalPathData(null);
+  };
+
+  const handleViewQTable = () => {
+    setShowQTable(!showQTable);
+    setShowOptimalPath(false); 
+  };
+
+  const handleShowPath = () => {
+    setShowOptimalPath(!showOptimalPath);
+    setShowQTable(false); 
   };
 
   return (
@@ -98,9 +144,33 @@ export default function Start() {
             <Panel>
               <h3 className="text-yellow-400 text-lg font-bold mb-4 text-center">Wumpus World Environment</h3>
               <div className="flex justify-center mb-4">
-                <Grid className="scale-100" />
+                <Grid 
+                  className="scale-100" 
+                  optimalPath={showOptimalPath && optimalPathData ? optimalPathData as number[][] : []} 
+                />
               </div>
             </Panel>
+
+            {/* Bagian untuk menampilkan Q-Table dan Path */}
+            {showQTable && qTableData && (
+              <Panel>
+                <h3 className="text-yellow-400 text-base font-bold mb-3">Q-Table</h3>
+                <div className="font-poppins text-white/90 text-xs overflow-auto h-64">
+                  <pre className="whitespace-pre-wrap">
+                    {JSON.stringify(qTableData, null, 2)}
+                  </pre>
+                </div>
+              </Panel>
+            )}
+
+            {showOptimalPath && optimalPathData && (
+              <Panel>
+                <h3 className="text-yellow-400 text-base font-bold mb-3">Optimal Path</h3>
+                <div className="font-poppins text-white/90 text-xs">
+                  <p>Path: {optimalPathData.map((coord: number[]) => `[${coord}]`).join(' -> ')}</p>
+                </div>
+              </Panel>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -165,10 +235,16 @@ export default function Start() {
                       >
                         Train Again
                       </button>
-                      <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200">
+                      <button
+                        onClick={handleViewQTable}
+                        className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200"
+                      >
                         View Q-Table
                       </button>
-                      <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200">
+                      <button
+                        onClick={handleShowPath}
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200"
+                      >
                         Show Path
                       </button>
                     </div>
