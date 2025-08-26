@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Button from '@/components/button';
 import Panel from '@/components/panel';
 import Grid from '@/components/grid';
+import HyperparameterPanel from '@/components/hyperparameters-input';
 import AlgorithmSelector from '@/components/algorithm-selector';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,6 +13,12 @@ export default function Start() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<'qlearning' | 'sarsa'>('qlearning');
   const [isTraining, setIsTraining] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [hyperparams, setHyperparams] = useState({
+    learningRate: 0.1,
+    discountFactor: 0.95,
+    epsilon: 1.0,
+    episodes: 1000
+  });
 
   const handleStartTraining = () => {
     setIsTraining(true);
@@ -28,15 +35,15 @@ export default function Start() {
   };
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
           <Image 
             src="/logo.png"  
             alt="Logo"  
-            width={80}  
-            height={80}
+            width={60}  
+            height={60}
             className="mx-auto mb-3"
           />
           <h1 className="text-white text-2xl font-bold tracking-wider mb-1">
@@ -47,7 +54,7 @@ export default function Start() {
           </p>
         </div>
 
-      <div className="grid grid-cols-1 gap-y-4 lg:grid-cols-4 lg:gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-6 gap-y-4">
           <div className="space-y-4">
             {/* Reinforcement Learning */}
             <Panel>
@@ -87,7 +94,6 @@ export default function Start() {
             </Panel>
           </div>
 
-          {/* Game Grid */}
           <div className="col-span-2 space-y-4">
             <Panel>
               <h3 className="text-yellow-400 text-lg font-bold mb-4 text-center">Wumpus World Environment</h3>
@@ -104,6 +110,15 @@ export default function Start() {
               <AlgorithmSelector 
                 selectedAlgorithm={selectedAlgorithm}
                 onSelect={setSelectedAlgorithm}
+              />
+            </Panel>
+
+            {/* Hyperparameter Setup */}
+            <Panel>
+              <h3 className="text-yellow-400 text-base font-bold mb-3">Hyperparameter Setup</h3>
+              <HyperparameterPanel 
+                hyperparams={hyperparams}
+                onChange={setHyperparams}
               />
             </Panel>
 
@@ -130,6 +145,9 @@ export default function Start() {
                     </div>
                     <p className="font-poppins text-white/90 text-xs">
                       Training {selectedAlgorithm.toUpperCase()}...
+                    </p>
+                    <p className="font-poppins text-white/70 text-xs mt-1">
+                      LR: {hyperparams.learningRate} | γ: {hyperparams.discountFactor} | ε: {hyperparams.epsilon}
                     </p>
                   </div>
                 )}
