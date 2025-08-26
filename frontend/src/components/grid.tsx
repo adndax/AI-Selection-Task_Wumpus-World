@@ -3,6 +3,7 @@ import Image from 'next/image';
 interface GridProps {
   size?: number;
   className?: string;
+  optimalPath?: number[][];
 }
 
 interface CellProps {
@@ -14,13 +15,15 @@ interface CellProps {
   textColor?: string;
   extraText?: string;
   extraTextColor?: string;
+  isOptimalPath?: boolean;
 }
 
-function Cell({ content, imageSrc, bgColor = 'bg-slate-700', textColor, extraText, extraTextColor }: CellProps) {
+function Cell({ content, imageSrc, bgColor = 'bg-slate-700', textColor, extraText, extraTextColor, isOptimalPath }: CellProps) {
+  const finalBgColor = isOptimalPath ? 'bg-indigo-500' : bgColor;
   return (
-    <div className={`w-24 h-24 border border-slate-500 flex items-center justify-center text-sm font-bold ${bgColor} ${textColor}`}>
+    <div className={`w-24 h-24 border border-slate-500 flex items-center justify-center text-sm font-bold ${finalBgColor}`}>
       <div className="flex flex-col items-center justify-center space-y-1">
-{extraText && <p className={`text-xs ${extraTextColor}`}>{extraText}</p>}
+        {extraText && <p className={`text-xs ${extraTextColor || 'text-white'}`}>{extraText}</p>}
         {imageSrc && (
           <Image
             src={imageSrc}
@@ -30,74 +33,95 @@ function Cell({ content, imageSrc, bgColor = 'bg-slate-700', textColor, extraTex
             className="object-contain"
           />
         )}
-        {content && <p className="text-xs">{content}</p>}
+        {content && <p className={`text-xs ${textColor || 'text-white'}`}>{content}</p>}
       </div>
     </div>
   );
 }
 
-export default function Grid({ size = 4, className = '' }: GridProps) {
+export default function Grid({ size = 4, className = '', optimalPath = [] }: GridProps) {
+  const WUMPUS_POS = [1, 3];
+  const GOLD_POS = [2, 3];
+  const PIT_POSITIONS = [[3, 1], [3, 3], [4, 4]];
+
+  const isAdjacent = (pos1: number[], pos2: number[]) => {
+    return Math.abs(pos1[0] - pos2[0]) + Math.abs(pos1[1] - pos2[1]) === 1;
+  };
+
   const getCellContent = (row: number, col: number) => {
-    const x = col + 1;
+    const x = col + 1; 
     const y = size - row;
-    
-    // Start position [1,1]
-    if (x === 1 && y === 1) {
-      return { content: 'Start', bgColor: 'bg-green-600', textColor: 'text-white' };
-    }
-    
-    // Wumpus [1,3]
-    if (x === 1 && y === 3) {
-      return { 
+    const currentPos = [x, y];
+
+    let cellData: Partial<CellProps> = { bgColor: 'bg-slate-700/80', textColor: 'text-white' };
+    let percepts: string[] = [];
+
+    if (x === 1 && y === 1) { 
+      cellData = { content: 'Start', bgColor: 'bg-green-600', textColor: 'text-white' };
+    } else if (currentPos[0] === WUMPUS_POS[0] && currentPos[1] === WUMPUS_POS[1]) { // Wumpus
+      cellData = { 
         imageSrc: '/wumpus.png',
         bgColor: 'bg-purple-900/80', 
         textColor: 'text-white' 
       };
-    }
-    
-    // Gold, Stench, and Breeze [2,3]
-    if (x === 2 && y === 3) {
-      return { 
-        content: 'Breeze', 
-        imageSrc: '/gold.png',
-        extraText: 'Stench',
-        extraTextColor: 'text-green-400',
-        bgColor: 'bg-yellow-600/80', 
-        textColor: 'text-blue-400'
-      };
-    }
-    
-    // Pits [3,1], [3,3], [4,4]
-    if ((x === 3 && y === 1) || (x === 3 && y === 3) || (x === 4 && y === 4)) {
-      return { 
+    } else if (PIT_POSITIONS.some(pit => pit[0] === currentPos[0] && pit[1] === currentPos[1])) { // Pits
+      cellData = { 
         content: 'Pit', 
         bgColor: 'bg-black/90', 
         textColor: 'text-white' 
       };
-    }
-    
-    // Stench around Wumpus 
-    if ((x === 2 && y === 3) || (x === 1 && y === 2) || (x === 1 && y === 4)) {
-      return { 
-        content: 'Stench', 
-        bgColor: 'bg-slate-800/80', 
-        textColor: 'text-green-400' 
+    } else if (currentPos[0] === GOLD_POS[0] && currentPos[1] === GOLD_POS[1]) { // Gold
+      cellData = { 
+        imageSrc: '/gold.png',
+        bgColor: 'bg-yellow-600/80', 
+        textColor: 'text-yellow-200' 
       };
+      percepts.push('Glitter');
+    }
+
+    const hasStench = isAdjacent(currentPos, WUMPUS_POS);
+    const hasBreeze = PIT_POSITIONS.some(pit => isAdjacent(currentPos, pit));
+
+    if (hasStench && !(currentPos[0] === WUMPUS_POS[0] && currentPos[1] === WUMPUS_POS[1])) {
+      percepts.push('Stench');
+    }
+    if (hasBreeze && !PIT_POSITIONS.some(pit => pit[0] === currentPos[0] && pit[1] === currentPos[1])) {
+      percepts.push('Breeze');
     }
     
-    // Breeze around Pits 
-    if ((x === 2 && y === 1) || (x === 3 && y === 2) || (x === 4 && y === 1) || (x === 4 && y === 3) || (x === 3 && y === 4) || (x === 4 && y === 4)) {
-      return { 
-        content: 'Breeze', 
-        bgColor: 'bg-slate-800/60', 
-        textColor: 'text-blue-400' 
-      };
+    if (currentPos[0] === GOLD_POS[0] && currentPos[1] === GOLD_POS[1]) {
+      let goldExtraTexts: string[] = [];
+      if (percepts.includes('Stench')) goldExtraTexts.push('Stench');
+      if (percepts.includes('Breeze')) goldExtraTexts.push('Breeze');
+
+      if (goldExtraTexts.length > 0) {
+        if (percepts.includes('Stench') && percepts.includes('Breeze')) {
+          cellData.extraText = 'Stench';
+          cellData.extraTextColor = 'text-green-400';
+          cellData.content = 'Breeze';
+          cellData.textColor = 'text-blue-400';
+        }
+      } else { 
+        cellData.content = 'Glitter';
+        cellData.textColor = 'text-yellow-200';
+      }
+    } else { 
+      if (percepts.includes('Stench')) {
+        cellData.content = 'Stench';
+        cellData.textColor = 'text-green-400';
+        cellData.bgColor = 'bg-slate-800/80';
+      } else if (percepts.includes('Breeze')) {
+        cellData.content = 'Breeze';
+        cellData.textColor = 'text-blue-400';
+        cellData.bgColor = 'bg-slate-800/60';
+      }
     }
-    
-    return { content: '', bgColor: 'bg-slate-700/80', textColor: 'text-white' };
+
+    return cellData;
   };
 
-
+  const mappedPath = optimalPath.map((coord: number[]) => [size - coord[1], coord[0] - 1]);
+  
   return (
     <div className={`inline-block ${className}`}>
       <div className="grid grid-cols-4 gap-0 border-2 border-yellow-400 rounded-lg overflow-hidden">
@@ -106,6 +130,8 @@ export default function Grid({ size = 4, className = '' }: GridProps) {
           const col = index % size;
           const cellData = getCellContent(row, col);
 
+          const isPath = mappedPath.some(pathCoord => pathCoord[0] === row && pathCoord[1] === col);
+          
           return (
             <Cell
               key={`${row}-${col}`}
@@ -117,6 +143,7 @@ export default function Grid({ size = 4, className = '' }: GridProps) {
               textColor={cellData.textColor}
               extraText={cellData.extraText}
               extraTextColor={cellData.extraTextColor}
+              isOptimalPath={isPath}
             />
           );
         })}
