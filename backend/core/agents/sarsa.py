@@ -3,7 +3,7 @@ import random
 from ..environment import Action
 
 class SARSAAgent:
-    def __init__(self, learning_rate, discount_factor, epsilon, epsilon_decay=0.995, epsilon_min=0.01):
+    def __init__(self, learning_rate, discount_factor, epsilon, epsilon_decay, epsilon_min):
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.epsilon = epsilon
