@@ -23,13 +23,12 @@ export default function Start() {
     learningRate: 0.1,
     discountFactor: 0.95,
     epsilon: 1.0,
-    episodes: 5000 // Meningkatkan episode untuk pelatihan yang lebih baik
+    episodes: 5000
   });
 
   const [qTableData, setQTableData] = useState(null);
   const [optimalPathData, setOptimalPathData] = useState<OptimalPathItem[] | null>(null);
   const [showQTable, setShowQTable] = useState(false);
-  // Perbaikan: Ganti setShowPath menjadi setShowOptimalPath
   const [showOptimalPath, setShowOptimalPath] = useState(false);
 
   const handleStartTraining = async () => {
@@ -100,7 +99,7 @@ export default function Start() {
             className="mx-auto mb-3"
           />
           <h1 className="text-white text-2xl font-bold tracking-wider mb-1">
-            Wumpus World Simulation
+            Wumpus World
           </h1>
           <p className="font-poppins text-white/70 text-sm">
             Reinforcement Learning with Q-Learning and SARSA
