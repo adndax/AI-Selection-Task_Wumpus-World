@@ -54,7 +54,7 @@ export default function Grid({ size = 4, className = '', optimalPath = [] }: Gri
     const currentPos = [x, y];
 
     let cellData: Partial<CellProps> = { bgColor: 'bg-slate-700/80', textColor: 'text-white' };
-    let percepts: string[] = [];
+    const percepts: string[] = [];
 
     if (x === 1 && y === 1) { 
       cellData = { content: 'Start', bgColor: 'bg-green-600', textColor: 'text-white' };
@@ -90,7 +90,7 @@ export default function Grid({ size = 4, className = '', optimalPath = [] }: Gri
     }
     
     if (currentPos[0] === GOLD_POS[0] && currentPos[1] === GOLD_POS[1]) {
-      let goldExtraTexts: string[] = [];
+      const goldExtraTexts: string[] = [];
       if (percepts.includes('Stench')) goldExtraTexts.push('Stench');
       if (percepts.includes('Breeze')) goldExtraTexts.push('Breeze');
 
