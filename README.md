@@ -52,12 +52,12 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 3. Install Python dependencies
 ```bash
-cd backend
 pip install -r requirements.txt
 ```
 
 4. Run the backend server
 ```bash
+cd backend
 python main.py
 ```
 The API server will start on `http://localhost:5001`
@@ -118,4 +118,5 @@ The web application will be available at `http://localhost:3000`
 | Adinda Putri | 13523071 |
 
 *Developed as part of an AI Laboratory Assistant Selection Project, demonstrating practical implementation of reinforcement learning algorithms in a classic AI problem domain.*
+
 
