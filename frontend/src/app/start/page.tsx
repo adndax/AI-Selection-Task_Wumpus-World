@@ -38,7 +38,7 @@ export default function Start() {
     setShowOptimalPath(false);
     
     try {
-      const response = await fetch('http://localhost:5001/api/train', {
+      const response = await fetch('http://localhost:8080/api/train', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

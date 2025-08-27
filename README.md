@@ -60,7 +60,7 @@ pip install -r requirements.txt
 cd backend
 python main.py
 ```
-The API server will start on `http://localhost:5001`
+The API server will start on `http://localhost:8080`
 
 ### Frontend Setup
 
