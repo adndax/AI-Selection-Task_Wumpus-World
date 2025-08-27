@@ -9,6 +9,12 @@ import AlgorithmSelector from '@/components/algorithm-selector';
 import Image from 'next/image';
 import Link from 'next/link';
 
+type OptimalPathItem = {
+  position: number[];
+  action: string;
+  direction: string;
+};
+
 export default function Start() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<'qlearning' | 'sarsa'>('qlearning');
   const [isTraining, setIsTraining] = useState(false);
@@ -17,12 +23,13 @@ export default function Start() {
     learningRate: 0.1,
     discountFactor: 0.95,
     epsilon: 1.0,
-    episodes: 1000
+    episodes: 5000 // Meningkatkan episode untuk pelatihan yang lebih baik
   });
 
   const [qTableData, setQTableData] = useState(null);
-  const [optimalPathData, setOptimalPathData] = useState<number[][] | null>(null);
+  const [optimalPathData, setOptimalPathData] = useState<OptimalPathItem[] | null>(null);
   const [showQTable, setShowQTable] = useState(false);
+  // Perbaikan: Ganti setShowPath menjadi setShowOptimalPath
   const [showOptimalPath, setShowOptimalPath] = useState(false);
 
   const handleStartTraining = async () => {
@@ -146,7 +153,7 @@ export default function Start() {
               <div className="flex justify-center mb-4">
                 <Grid 
                   className="scale-100" 
-                  optimalPath={showOptimalPath && optimalPathData ? optimalPathData as number[][] : []} 
+                  optimalPath={showOptimalPath && optimalPathData ? optimalPathData.map(item => item.position) : []} 
                 />
               </div>
             </Panel>
@@ -166,8 +173,24 @@ export default function Start() {
             {showOptimalPath && optimalPathData && (
               <Panel>
                 <h3 className="text-yellow-400 text-base font-bold mb-3">Optimal Path</h3>
-                <div className="font-poppins text-white/90 text-xs">
-                  <p>Path: {optimalPathData.map((coord: number[]) => `[${coord}]`).join(' -> ')}</p>
+                <div className="font-poppins text-white/90 text-xs space-y-2">
+                  <div>
+                    <h4 className="text-white font-semibold mb-1">Path Coordinates:</h4>
+                    <p>{optimalPathData.map(item => `[${item.position.join(',')}]`).join(' → ')}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-white font-semibold mb-1">Detailed Steps:</h4>
+                    <div className="space-y-1">
+                      {optimalPathData.map((item, index) => (
+                        <div key={index} className="text-xs">
+                          <span className="text-yellow-400">Step {index + 1}:</span> 
+                          <span className="text-white"> [{item.position.join(',')}] </span>
+                          <span className="text-green-400">{item.action}</span>
+                          <span className="text-blue-400"> (facing {item.direction})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </Panel>
             )}

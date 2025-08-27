@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from core.environment import Environment, Action
+from core.environment import Environment, Action, Direction
 from core.agents.qlearning import QLearningAgent
 from core.agents.sarsa import SARSAAgent
 from core.state_encoder import StateEncoder
@@ -42,32 +42,51 @@ def train_agent(agent, env, encoder, episodes):
 
         agent.decay_epsilon()
         training_log.append(total_reward)
-    return agent.get_final_q_table(), training_log
+    return agent.q_table, training_log
 
 def find_optimal_path(q_table, encoder, env):
     path = []
     state = env.reset()
-    path.append(list(state[0]))
+    
+    path.append({
+        'position': list(state[0]), 
+        'action': 'Start', 
+        'direction': Direction(state[1]).name
+    })
     done = False
+    visited_states = set() 
     
     while not done:
         encoded_state = encoder.encode(state)
-        if str(encoded_state) not in q_table:
+        
+        if encoded_state in visited_states:
+            break
+            
+        visited_states.add(encoded_state)
+        
+        if encoded_state not in q_table:
             break
         
-        q_values = q_table[str(encoded_state)]
+        q_values = q_table[encoded_state]
         best_action_value = np.argmax(q_values)
         best_action = Action(best_action_value)
         
         state, _, done, _ = env.step(best_action)
-        path.append(list(state[0]))
+        
+        path.append({
+            'position': list(state[0]),
+            'action': best_action.name,
+            'direction': Direction(state[1]).name
+        })
+        
         if done:
             break
-            
+    
     return path
 
 @app.route('/api/train', methods=['POST'])
 def handle_train_request():
+    
     data = request.json
     algorithm_name = data.get('algorithm')
     hyperparams = data.get('hyperparams')
@@ -80,20 +99,24 @@ def handle_train_request():
     epsilon = hyperparams['epsilon']
     episodes = hyperparams['episodes']
     
+    epsilon_decay = 0.999 if episodes > 1000 else 0.995
+    epsilon_min = 0.1  
+    
     if algorithm_name == 'qlearning':
-        agent = QLearningAgent(learning_rate, discount_factor, epsilon)
+        agent = QLearningAgent(learning_rate, discount_factor, epsilon, epsilon_decay, epsilon_min)
     elif algorithm_name == 'sarsa':
-        agent = SARSAAgent(learning_rate, discount_factor, epsilon)
+        agent = SARSAAgent(learning_rate, discount_factor, epsilon, epsilon_decay, epsilon_min)
     else:
         return jsonify({'success': False, 'error': 'Invalid algorithm specified'}), 400
     
     q_table, training_log = train_agent(agent, env, encoder, episodes)
     optimal_path = find_optimal_path(q_table, encoder, env)
+    serializable_q_table = agent.get_final_q_table()
     
     return jsonify({
         'success': True,
         'message': f'Training with {algorithm_name.upper()} completed.',
-        'q_table': q_table,
+        'q_table': serializable_q_table,
         'optimal_path': optimal_path
     })
 
