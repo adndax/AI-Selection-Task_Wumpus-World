@@ -31,14 +31,18 @@ export default function Start() {
   const [showQTable, setShowQTable] = useState(false);
   const [showOptimalPath, setShowOptimalPath] = useState(false);
 
-  const handleStartTraining = async () => {
+const handleStartTraining = async () => {
     setIsTraining(true);
     setIsComplete(false);
     setShowQTable(false);
     setShowOptimalPath(false);
     
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://web-production-fd24a.up.railway.app' 
+      : 'http://localhost:8080';
+    
     try {
-      const response = await fetch('http://localhost:8080/api/train', {
+      const response = await fetch(`${baseUrl}/api/train`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
