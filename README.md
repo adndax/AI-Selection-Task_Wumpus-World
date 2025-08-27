@@ -40,8 +40,8 @@ This project implements a complete Wumpus World environment where AI agents lear
 
 1. Clone the repository
 ```bash
-git clone https://github.com/adndax/wumpus-world/
-cd wumpus-world
+git clone https://github.com/adndax/AI-Selection-Task_Wumpus-World
+cd AI-Selection-Task_Wumpus-World
 ```
 
 2. Create virtual environment
@@ -110,6 +110,12 @@ The web application will be available at `http://localhost:3000`
 
 - **Backend**: Python Flask API with custom RL algorithm implementations
 - **Frontend**: Next.js React application with TypeScript
-- **State Representation**: Tuple-based encoding including position, direction, gold status, and sensor readings
-- **Learning**: Epsilon-greedy exploration with configurable decay
-- **Visualization**: Interactive grid showing agent path and environment hazards
+
+## Author
+
+| Name | NIM |
+|------|-----|
+| Adinda Putri | 13523071 |
+
+*Developed as part of an AI Laboratory Assistant Selection Project, demonstrating practical implementation of reinforcement learning algorithms in a classic AI problem domain.*
+
