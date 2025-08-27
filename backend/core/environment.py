@@ -86,7 +86,7 @@ class Environment:
         if self.agent_position == self.gold_position and not self.has_gold:
             self.has_gold = True
             return 1000
-        return 0
+        return -1
 
     def step(self, action):
         reward = -1
