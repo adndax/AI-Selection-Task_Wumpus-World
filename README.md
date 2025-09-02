@@ -90,7 +90,7 @@ The web application will be available at `http://localhost:3000`
    - Episodes: Number of training iterations
 3. **Start Training**: Click "Start Training" to begin the learning process
 4. **View Results**: 
-   - Inspect the Q-Table to understand learned values
+   - Inspect the Q-Table and policy to understand learned values
    - Visualize the optimal path on the grid
    - Compare different algorithm behaviors
 
@@ -118,5 +118,6 @@ The web application will be available at `http://localhost:3000`
 | Adinda Putri | 13523071 |
 
 *Developed as part of an AI Laboratory Assistant Selection Project, demonstrating practical implementation of reinforcement learning algorithms in a classic AI problem domain.*
+
 
 
