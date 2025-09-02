@@ -15,10 +15,20 @@ type OptimalPathItem = {
   direction: string;
 };
 
+type PolicyItem = {
+  best_action: string;
+  best_q_value: number;
+  all_q_values: Record<string, number>;
+};
+
+type PolicyData = Record<string, PolicyItem>;
+
 export default function Start() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<'qlearning' | 'sarsa'>('qlearning');
   const [isTraining, setIsTraining] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [policyData, setPolicyData] = useState<PolicyData | null>(null);
+  const [showPolicy, setShowPolicy] = useState(false);
   const [hyperparams, setHyperparams] = useState({
     learningRate: 0.1,
     discountFactor: 0.95,
@@ -56,8 +66,9 @@ const handleStartTraining = async () => {
       const result = await response.json();
       
       if (response.ok && result.success) {
-        setQTableData(result.q_table);
-        setOptimalPathData(result.optimal_path);
+        setQTableData(result.results.q_table);
+        setOptimalPathData(result.results.optimal_path);
+        setPolicyData(result.results.policy);
         console.log('Training started:', result.message);
         setIsTraining(false);
         setIsComplete(true);
@@ -78,16 +89,20 @@ const handleStartTraining = async () => {
     setShowOptimalPath(false);
     setQTableData(null);
     setOptimalPathData(null);
+    setPolicyData(null);
+    setShowPolicy(false);
+  };
+
+  const handleViewPolicy = () => {
+  setShowPolicy(!showPolicy);
   };
 
   const handleViewQTable = () => {
     setShowQTable(!showQTable);
-    setShowOptimalPath(false); 
   };
 
   const handleShowPath = () => {
     setShowOptimalPath(!showOptimalPath);
-    setShowQTable(false); 
   };
 
   return (
@@ -161,7 +176,7 @@ const handleStartTraining = async () => {
               </div>
             </Panel>
 
-            {/* Bagian untuk menampilkan Q-Table dan Path */}
+            {/* Bagian untuk menampilkan Q-Table, Path, dan Policy */}
             {showQTable && qTableData && (
               <Panel>
                 <h3 className="text-yellow-400 text-base font-bold mb-3">Q-Table</h3>
@@ -197,7 +212,24 @@ const handleStartTraining = async () => {
                 </div>
               </Panel>
             )}
+
+          {showPolicy && policyData && (
+            <Panel>
+              <h3 className="text-yellow-400 text-base font-bold mb-3">Policy</h3>
+              <div className="font-poppins text-white/90 text-xs space-y-1 max-h-64 overflow-y-auto">
+              {Object.entries(policyData).map(([state, policy]: [string, PolicyItem], index) => (
+                <div key={index} className="text-xs">
+                  <span className="text-yellow-400">State {state}:</span> 
+                  <span className="text-green-400"> {policy.best_action}</span>
+                  <span className="text-blue-400"> (Q: {policy.best_q_value.toFixed(3)})</span>
+                </div>
+              ))}
+              </div>
+            </Panel>
+          )}
+          
           </div>
+
 
           <div className="space-y-4">
             {/* Algorithm Selection */}
@@ -265,13 +297,19 @@ const handleStartTraining = async () => {
                         onClick={handleViewQTable}
                         className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200"
                       >
-                        View Q-Table
+                        {showQTable ? 'Hide' : 'View'} Q-Table
                       </button>
                       <button
                         onClick={handleShowPath}
                         className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200"
                       >
-                        Show Path
+                        {showOptimalPath ? 'Hide' : 'Show'} Path
+                      </button>
+                      <button
+                        onClick={handleViewPolicy}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 text-xs rounded-lg transition-colors duration-200"
+                      >
+                        {showPolicy ? 'Hide' : 'View'} Policy
                       </button>
                     </div>
                   </div>
