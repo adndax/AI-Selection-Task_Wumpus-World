@@ -94,7 +94,10 @@ The web application will be available at `http://localhost:3000`
    - Visualize the optimal path on the grid
    - Compare different algorithm behaviors
 
-## Algorithm Comparison
+## Algorithms
+
+- [x] Q-Learning  
+- [x] SARSA
 
 **Q-Learning (Off-Policy)**:
 - Learns optimal policy regardless of exploration strategy
@@ -118,6 +121,7 @@ The web application will be available at `http://localhost:3000`
 | Adinda Putri | 13523071 |
 
 *Developed as part of an AI Laboratory Assistant Selection Project, demonstrating practical implementation of reinforcement learning algorithms in a classic AI problem domain.*
+
 
 
 
